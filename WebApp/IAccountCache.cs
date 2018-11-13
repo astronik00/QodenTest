@@ -1,4 +1,6 @@
-﻿namespace WebApp
+using System;
+
+namespace WebApp
 {
     public interface IAccountCache
     {
