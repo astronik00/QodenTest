@@ -1,25 +1,25 @@
 # My solutions
 
 ## TODO #0
-To fix this problem was turned off endpoint routing:
+To fix this problem endpoint routing was turned off:
 ```C#
 services.AddControllersWithViews(_ => _.EnableEndpointRouting = false);
 ```
 
-And added creating of `AccountService` service:
+Added creation of `AccountService` service:
 ```C#
 services.AddSingleton<IAccountService, AccountService>();
 ```
 
 ## TODO #1
 To add cookie authorization next changes were made in `ConfigureServices` and `ConfigureServices` methods in `Startup`:
-1. In method `Configure` in `Startup` turned on authentication and authorization:
+1. In method `Configure` in `Startup` were turned on authentication and authorization:
 ```C#
 app.UseAuthentication();
 app.UseAuthorization();
 ```
 
-2. Turned on cookies authentication in method `ConfigureServices` in `Startup` :
+2. Cookie authentication was turned on in method `ConfigureServices` in `Startup` :
 ```C#
 services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
@@ -109,9 +109,9 @@ return Task.FromResult(account.Clone());
 ```
 
 As you can see, this method returns copy, so all changes happen with this one and not the original object. As far as I can see, this issue can be fixed with either of two ways:
-1. Return the original object (remove Clone() call)
+1. Return the original object (remove .Clone() call)
 2. Leave .Clone() and update the database and cache and change values there
 
-If we pay attention to the method's name `GetOrCreate`, than we'll see that it combines idempotent and not idempotent operations. If we don't create any more functions when I don't see the problem with sticking to the first approach and adding another not idempotent opration by removing .Clone() call. If we don't want to remove .Clone(), than we'll facing the need to create another function, but if we create another function, why don't split idempotent and not idempotent operations?
+If we pay attention to the method's name `GetOrCreate`, than we'll see that it combines idempotent and not idempotent operations. If we don't create any more functions when I don't see the problem with sticking to the first approach and adding another not idempotent opration by removing .Clone() call. 
 
-
+If we don't want to remove .Clone(), than we'll face the need to create another function, but IF we create another function, than why don't split idempotent and not idempotent operations?
