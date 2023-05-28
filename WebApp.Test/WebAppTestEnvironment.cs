@@ -1,32 +1,30 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
-using NUnit.Framework;
 
-namespace WebApp.Test
+namespace WebApp.Test;
+
+public class WebAppTestEnvironment : IDisposable
 {
-    public class WebAppTestEnvironment : IDisposable
+    public WebAppTestEnvironment()
     {
-        public WebAppTestHost WebAppHost { get; }
+        WebAppHost = new WebAppTestHost();
+    }
 
-        public WebAppTestEnvironment()
-        {
-            WebAppHost = new WebAppTestHost();
-        }
+    public WebAppTestHost WebAppHost { get; }
 
-        public void Start()
-        {
-            WebAppHost.Start();
-        }
+    public void Dispose()
+    {
+        WebAppHost?.Dispose();
+    }
 
-        public void Prepare()
-        {
-            WebAppHost.Services.GetRequiredService<IAccountCache>().Clear();
-            WebAppHost.Services.GetRequiredService<IAccountDatabase>().ResetAsync().GetAwaiter().GetResult();
-        }
+    public void Start()
+    {
+        WebAppHost.Start();
+    }
 
-        public void Dispose()
-        {
-            WebAppHost?.Dispose();
-        }
+    public void Prepare()
+    {
+        WebAppHost.Services.GetRequiredService<IAccountCache>().Clear();
+        WebAppHost.Services.GetRequiredService<IAccountDatabase>().ResetAsync().GetAwaiter().GetResult();
     }
 }

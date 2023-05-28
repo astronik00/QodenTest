@@ -1,51 +1,50 @@
 using System.Collections.Generic;
-using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using System.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
 
-namespace WebApp
+namespace WebApp;
+
+[Route("api")]
+public class LoginController : Controller
 {
-    [Route("api")]
-    public class LoginController : Controller
+    private readonly IAccountDatabase _db;
+
+    public LoginController(IAccountDatabase db)
     {
-        private readonly IAccountDatabase _db;
+        _db = db;
+    }
 
-        public LoginController(IAccountDatabase db)
+    [HttpPost("sign-in/{userName}")]
+    public async Task<IActionResult> Login([FromRoute] string userName)
+    {
+        var account = await _db.FindByUserNameAsync(userName);
+
+        if (account != null)
         {
-            _db = db;
-        }
+            var id = account.ExternalId;
 
-        [HttpPost("sign-in/{userName}")]
-        public async Task<IActionResult> Login([FromRoute] string userName)
-        {
-            var account = await _db.FindByUserNameAsync(userName);
-
-            if (account != null)
+            var claims = new List<Claim>
             {
-                var id = account.ExternalId;
-                
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.NameIdentifier, account.ExternalId),
-                    new Claim(ClaimTypes.Name, account.UserName),
-                    new Claim(ClaimTypes.Role, account.Role)
-                }; 
-                
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme); 
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
-                
-                return Ok(account);
-                
-                //TODO 1: Generate auth cookie for user 'userName' with external id
-                //Done
-            }
-            //TODO 2: return 404 if user not found
+                new(ClaimTypes.NameIdentifier, account.ExternalId),
+                new(ClaimTypes.Name, account.UserName),
+                new(ClaimTypes.Role, account.Role)
+            };
+
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity));
+
+            return Ok(account);
+
+            //TODO 1: Generate auth cookie for user 'userName' with external id
             //Done
-            return NotFound();
         }
+
+        //TODO 2: return 404 if user not found
+        //Done
+        return NotFound();
     }
 }
