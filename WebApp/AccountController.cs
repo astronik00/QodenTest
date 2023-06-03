@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 namespace WebApp
 {
     // TODO 4: unauthorized users should receive 401 status code
-    // Done
     [Authorize]
     [Route("api/account")]
     public class AccountController : Controller
@@ -29,7 +28,6 @@ namespace WebApp
         }
 
         // TODO 5: Endpoint should works only for users with "Admin" Role
-        // DONE
         [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public Account GetByInternalId([FromRoute] int id)
@@ -43,7 +41,7 @@ namespace WebApp
         {
             //Update account in cache, don't bother saving to DB, this is not an objective of this task.
             var account = await Get();
-            account.Counter++;
+            _accountService.UpdateCounter(account.ExternalId);
         }
     }
 }

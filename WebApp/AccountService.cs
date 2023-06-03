@@ -44,5 +44,19 @@ namespace WebApp
 
             return account;
         }
+
+        public async void UpdateCounter(string id)
+        {
+            _db.UpdateCounter(id);
+            var account = await _db.GetOrCreateAccountAsync(id);
+            _cache.AddOrUpdate(account);
+        }
+        
+        public async void UpdateCounter(long id)
+        {
+            _db.UpdateCounter(id);
+            var account = await _db.GetOrCreateAccountAsync(id);
+            _cache.AddOrUpdate(account);
+        }
     }
 }

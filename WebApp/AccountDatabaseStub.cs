@@ -41,7 +41,7 @@ namespace WebApp
                     };
                     _accounts[id] = account;
                 }
-                return Task.FromResult(account);
+                return Task.FromResult(account.Clone());
             }
         }
 
@@ -59,7 +59,7 @@ namespace WebApp
                     };
                     _accounts[account.ExternalId] = account;
                 }
-                return Task.FromResult(account);
+                return Task.FromResult(account.Clone());
             }
         }
 
@@ -69,6 +69,30 @@ namespace WebApp
             {
                 var account = _accounts.Values.FirstOrDefault(x => x.UserName == userName);
                 return Task.FromResult(account?.Clone());
+            }
+        }
+
+        public void UpdateCounter(string id)
+        {
+            lock (this)
+            {
+                var account = _accounts.FirstOrDefault(x => x.Value.ExternalId == id).Value;
+                if (account != null)
+                {
+                    _accounts[account.ExternalId].Counter++;
+                }
+            }
+        }
+        
+        public void UpdateCounter(long id)
+        {
+            lock (this)
+            {
+                var account = _accounts.FirstOrDefault(x => x.Value.InternalId == id).Value;
+                if (account != null)
+                {
+                    _accounts[account.ExternalId].Counter++;
+                }
             }
         }
 

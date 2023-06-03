@@ -10,6 +10,10 @@ namespace WebApp
 
         Task<Account> FindByUserNameAsync(string userName);
 
+        void UpdateCounter(string id);
+
+        void UpdateCounter(long id);
+
         Task ResetAsync();
     }
 }
