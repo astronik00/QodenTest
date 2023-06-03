@@ -108,7 +108,7 @@ The described dysfunctionality comes from method `GetOrCreateAccountAsync` in `A
 return Task.FromResult(account.Clone());
 ```
 
-As you can see, this method returns copy, so all changes happen with this one and not the original object. As far as I can see, this issue can be fixed with either of two ways:
+As you can see, this method returns shallow copy, so all primitive types changes happen with this one and not the original object. As far as I can see, this issue can be fixed with either of two ways:
 1. Return the original object (remove .Clone() call)
 2. Leave .Clone() and update the database and cache and change values there
 
