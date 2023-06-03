@@ -15,5 +15,12 @@ namespace WebApp
         ValueTask<Account> LoadOrCreateAsync(string id);
         
         ValueTask<Account> LoadOrCreateAsync(long id);
+
+        /// <summary>
+        ///  Update account's counter if it exists
+        /// </summary>
+        void UpdateCounter(string id);
+        
+        void UpdateCounter(long id);
     }
 }
