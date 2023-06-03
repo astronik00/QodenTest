@@ -60,7 +60,7 @@ if (account != null)
 ```
 
 ## TODO #2
-1. Changed `Login` method return type in `LoginController`:
+1. Changed `Login` method return type in `LoginController` and added [FromRoute] (but I don't think that's right... userName is like auth information and in real usage we are going to perform validation by user data that in this case is userName):
 ```C#
 public async Task<IActionResult> Login([FromRoute] string userName)
 ```
@@ -114,4 +114,68 @@ As you can see, this method returns copy, so all changes happen with this one an
 
 If we pay attention to the method's name `GetOrCreate`, than we'll see that it combines idempotent and not idempotent operations. If we don't create any more functions when I don't see the problem with sticking to the first approach and adding another not idempotent opration by removing .Clone() call. 
 
-If we don't want to remove .Clone(), than we'll face the need to create another function, but IF we create another function, than why don't split idempotent and not idempotent operations?
+If we don't want to remove .Clone(), than I think it's better to add another function that will change db state.
+
+So, the first approach is to change this:
+```C#
+return Task.FromResult(account.Clone());
+```
+
+on:
+```C#
+return Task.FromResult(account);
+```
+
+And the second one:
+1. Change `UpdateAccount` in `AccountController.cs`
+```C#
+//Update account in cache, don't bother saving to DB, this is not an objective of this task.
+var account = await Get();
+_accountService.UpdateCounter(account.ExternalId);
+```
+
+2. Create update functions in `AccountService`:
+```C#
+public async void UpdateCounter(string id)
+{
+  _db.UpdateCounter(id);
+  var account = await _db.GetOrCreateAccountAsync(id);
+  _cache.AddOrUpdate(account);
+}
+        
+ public async void UpdateCounter(long id)
+ {
+  _db.UpdateCounter(id);
+  var account = await _db.GetOrCreateAccountAsync(id);
+  _cache.AddOrUpdate(account);
+ }
+```
+
+3. And create update functions in `AccountDatabaseStub`:
+```C#
+public void UpdateCounter(string id)
+{
+  lock (this)
+  {
+    var account = _accounts.FirstOrDefault(x => x.Value.ExternalId == id).Value;
+      if (account != null)
+      {
+        _accounts[account.ExternalId].Counter++;
+      }
+  }
+}
+
+public void UpdateCounter(long id)
+{
+  lock (this)
+  {
+    var account = _accounts.FirstOrDefault(x => x.Value.InternalId == id).Value;
+      if (account != null)
+      {
+        _accounts[account.ExternalId].Counter++;
+      }
+  }
+}
+```
+
+4. Create function signatures in `IAccountService`, `IAccountDatabase`
